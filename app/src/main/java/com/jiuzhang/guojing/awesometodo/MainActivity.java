@@ -5,15 +5,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import com.jiuzhang.guojing.awesometodo.data.Todo;
+import com.jiuzhang.guojing.awesometodo.models.Todo;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -44,58 +39,6 @@ public class MainActivity extends AppCompatActivity {
         ListView listView = (ListView) findViewById(R.id.main_list_view);
         listView.setAdapter(new TodoListAdapter(this, mockData()));
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (Activity.RESULT_OK == resultCode) {
-//            if (REQ_CODE_NEW_TODO == requestCode) {
-//                Todo newTodo = data.getParcelableExtra(NewTodoActivity.KEY_TODO);
-//                adapter.add(newTodo);
-//            } else if (REQ_CODE_TODO_DETAIL == requestCode) {
-//                Todo newTodo = data.getParcelableExtra(TodoDetailActivity.KEY_TODO);
-//                int index = data.getIntExtra(TodoDetailActivity.KEY_INDEX, 0);
-//                adapter.remove(adapter.getItem(index));
-//                adapter.insert(newTodo, index);
-//            }
-//        }
-//    }
-
-//    private void setupUI(@NonNull List<Todo> data) {
-//        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.todo_list);
-//        linearLayout.removeAllViews();
-//
-//        for (Todo todo : data) {
-//            View view = LayoutInflater.from(this).inflate(R.layout.main_list_item, null);
-//            setupListItem(view, todo);
-//            linearLayout.addView(view);
-//        }
-//    }
-//
-//    private void setupListItem(@NonNull View listItemView, @NonNull Todo data) {
-//        ((TextView) listItemView.findViewById(R.id.main_list_item_text)).setText(data.text);
-//    }
 
     @NonNull
     private List<Todo> mockData() {

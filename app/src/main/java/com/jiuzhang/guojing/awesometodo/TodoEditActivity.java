@@ -19,13 +19,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.jiuzhang.guojing.awesometodo.data.Todo;
+import com.jiuzhang.guojing.awesometodo.models.Todo;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class TodoDetailActivity extends AppCompatActivity implements
+public class TodoEditActivity extends AppCompatActivity implements
         DatePickerDialog.OnDateSetListener,
         TimePickerDialog.OnTimeSetListener {
 
@@ -66,8 +66,8 @@ public class TodoDetailActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 Dialog dialog = new DatePickerDialog(
-                        TodoDetailActivity.this,
-                        TodoDetailActivity.this,
+                        TodoEditActivity.this,
+                        TodoEditActivity.this,
                         2010, 1, 1);
                 dialog.show();
             }
@@ -79,8 +79,8 @@ public class TodoDetailActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 Dialog dialog = new TimePickerDialog(
-                        TodoDetailActivity.this,
-                        TodoDetailActivity.this,
+                        TodoEditActivity.this,
+                        TodoEditActivity.this,
                         0, 0, true);
                 dialog.show();
             }
