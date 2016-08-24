@@ -19,8 +19,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQ_CODE_NEW_TODO = 100;
-    public static final int REQ_CODE_TODO_DETAIL = 101;
+    private static final int REQ_CODE_TODO_EDIT = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, NewTodoActivity.class);
-                startActivityForResult(intent, REQ_CODE_NEW_TODO);
+                Intent intent = new Intent(MainActivity.this, TodoEditActivity.class);
+                startActivityForResult(intent, REQ_CODE_TODO_EDIT);
             }
         });
 
