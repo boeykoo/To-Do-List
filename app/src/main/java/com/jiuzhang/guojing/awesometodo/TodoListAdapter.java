@@ -1,9 +1,6 @@
 package com.jiuzhang.guojing.awesometodo;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Paint;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -12,6 +9,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.jiuzhang.guojing.awesometodo.models.Todo;
+import com.jiuzhang.guojing.awesometodo.utils.UIUtils;
 
 import java.util.List;
 
@@ -56,16 +54,9 @@ public class TodoListAdapter extends BaseAdapter {
 
         final Todo todo = (Todo) getItem(position);
         vh.todoText.setText(todo.text);
-
-        if (todo.done) {
-            // strike through effect on the text
-            vh.todoText.setPaintFlags(vh.todoText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        } else {
-            // no strike through effect
-            vh.todoText.setPaintFlags(vh.todoText.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-        }
-
         vh.doneCheckbox.setChecked(todo.done);
+        UIUtils.setTextViewStrikeThrough(vh.todoText, todo.done);
+
         vh.doneCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
