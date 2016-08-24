@@ -1,25 +1,29 @@
 package com.jiuzhang.guojing.awesometodo;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ListView;
 
+import com.google.gson.reflect.TypeToken;
 import com.jiuzhang.guojing.awesometodo.models.Todo;
+import com.jiuzhang.guojing.awesometodo.utils.ModelUtils;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQ_CODE_TODO_EDIT = 100;
+    public static final int REQ_CODE_TODO_EDIT = 100;
+
+    private static final String TODOS = "todos";
+
+    private TodoListAdapter adapter;
+    private List<Todo> todos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,37 +39,52 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ListView listView = (ListView) findViewById(R.id.main_list_view);
-        listView.setAdapter(new TodoListAdapter(this, mockData()));
+        loadData();
+
+        adapter = new TodoListAdapter(this, todos);
+        ((ListView) findViewById(R.id.main_list_view)).setAdapter(adapter);
     }
 
-    @NonNull
-    private List<Todo> mockData() {
-        List<Todo> list = new ArrayList<>();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CODE_TODO_EDIT && resultCode == Activity.RESULT_OK) {
+            Todo todo = data.getParcelableExtra(TodoEditActivity.KEY_TODO);
+            updateTodo(todo);
+        }
+    }
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy MM dd HH:mm", Locale.getDefault());
-        try {
-            list.add(new Todo("lala", dateFormat.parse("2011 1 1 0:00")));
-            list.add(new Todo("yiyi", dateFormat.parse("2013 3 8 0:00")));
-            list.add(new Todo("shit", dateFormat.parse("2015 7 29 0:00")));
-            list.add(new Todo("todo 1", dateFormat.parse("2015 7 29 0:00")));
-            list.add(new Todo("todo 2", dateFormat.parse("2015 7 29 0:00")));
-            list.add(new Todo("todo 3", dateFormat.parse("2015 7 29 0:00")));
-            list.add(new Todo("todo 4", dateFormat.parse("2015 7 29 0:00")));
-            list.add(new Todo("todo 5", dateFormat.parse("2015 7 29 0:00")));
-            list.add(new Todo("todo 6", dateFormat.parse("2015 7 29 0:00")));
-            list.add(new Todo("todo 7", dateFormat.parse("2015 7 29 0:00")));
-            list.add(new Todo("todo 8", dateFormat.parse("2015 7 29 0:00")));
-            list.add(new Todo("todo 9", dateFormat.parse("2015 7 29 0:00")));
-
-            for (int i = 0; i < 1000; ++i) {
-                list.add(new Todo("todo 9", dateFormat.parse("2015 7 29 0:00")));
+    private void updateTodo(Todo todo) {
+        boolean found = false;
+        for (int i = 0; i < todos.size(); ++i) {
+            Todo item = todos.get(i);
+            if (TextUtils.equals(item.id, todo.id)) {
+                found = true;
+                todos.set(i, todo);
+                break;
             }
-
-        } catch (ParseException e) {
-            e.printStackTrace();
         }
 
-        return list;
+        if (!found) {
+            todos.add(todo);
+        }
+
+        ModelUtils.save(this, TODOS, todos);
+
+        adapter.notifyDataSetChanged();
+    }
+
+    public void updateTodo(int index, boolean done) {
+        todos.get(index).done = done;
+        adapter.notifyDataSetChanged();
+
+        ModelUtils.save(this, TODOS, todos);
+    }
+
+    private void loadData() {
+        todos = ModelUtils.read(this, TODOS, new TypeToken<List<Todo>>(){});
+        if (todos == null) {
+            todos = new ArrayList<>();
+        }
     }
 }

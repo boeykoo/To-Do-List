@@ -6,11 +6,11 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -20,68 +20,99 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.jiuzhang.guojing.awesometodo.models.Todo;
+import com.jiuzhang.guojing.awesometodo.utils.DateUtils;
+import com.jiuzhang.guojing.awesometodo.utils.UIUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
+import java.util.Date;
 
+@SuppressWarnings("ConstantConditions")
 public class TodoEditActivity extends AppCompatActivity implements
         DatePickerDialog.OnDateSetListener,
         TimePickerDialog.OnTimeSetListener {
 
     public static final String KEY_TODO = "todo";
-    public static final String KEY_INDEX = "index";
 
+    private EditText todoEdit;
     private TextView dateTv;
     private TextView timeTv;
+    private CheckBox completeCb;
 
     private Todo todo;
-    private int index;
+    private Date remindDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_todo_detail);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.anim_toolbar);
-        setSupportActionBar(toolbar);
-        setTitle(null);
-
         todo = getIntent().getParcelableExtra(KEY_TODO);
-        index = getIntent().getIntExtra(KEY_INDEX, 0);
-        initUI();
+        remindDate = todo != null
+                ? todo.remindDate
+                : Calendar.getInstance().getTime();
+
+        setupUI();
     }
 
-    private void initUI (){
-        final EditText todoEdit = (EditText) findViewById(R.id.toto_detail_todo_edit);
-        todoEdit.setText(todo.text);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
-//        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-//        collapsingToolbar.setTitle("Yeah");
+    private void setupToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle(null);
+    }
+
+    private void setupUI(){
+        setContentView(R.layout.activity_todo_detail);
+        setupToolbar();
+
+        todoEdit = (EditText) findViewById(R.id.toto_detail_todo_edit);
         dateTv = (TextView) findViewById(R.id.todo_detail_date);
-        dateTv.setText(new SimpleDateFormat("EEE, MMM dd, yyyy", Locale.getDefault()).format(todo.remindDate));
+        timeTv = (TextView) findViewById(R.id.todo_detail_time);
+        completeCb = (CheckBox) findViewById(R.id.todo_detail_complete);
+
+        dateTv.setText(DateUtils.dateToStringDate(remindDate));
+        timeTv.setText(DateUtils.dateToStringTime(remindDate));
+
+        if (todo != null) {
+            todoEdit.setText(todo.text);
+            UIUtils.setTextViewStrikeThrough(todoEdit, todo.done);
+            completeCb.setChecked(todo.done);
+        }
+
+        final Calendar c = Calendar.getInstance();
+        c.setTime(remindDate);
+
         dateTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Dialog dialog = new DatePickerDialog(
                         TodoEditActivity.this,
                         TodoEditActivity.this,
-                        2010, 1, 1);
+                        c.get(Calendar.YEAR),
+                        c.get(Calendar.MONTH),
+                        c.get(Calendar.DAY_OF_MONTH));
                 dialog.show();
             }
         });
 
-        timeTv = (TextView) findViewById(R.id.todo_detail_time);
-        timeTv.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(todo.remindDate));
         timeTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Dialog dialog = new TimePickerDialog(
                         TodoEditActivity.this,
                         TodoEditActivity.this,
-                        0, 0, true);
+                        c.get(Calendar.HOUR_OF_DAY),
+                        c.get(Calendar.MINUTE),
+                        true);
                 dialog.show();
             }
         });
@@ -90,27 +121,15 @@ public class TodoEditActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                todo.text = todoEdit.getText().toString();
-
-                Intent result = new Intent();
-                result.putExtra(KEY_TODO, todo);
-                result.putExtra(KEY_INDEX, index);
-                setResult(Activity.RESULT_OK, result);
-                finish();
+                saveAndExit();
             }
         });
 
-        final CheckBox completeCb = (CheckBox) findViewById(R.id.todo_detail_complete);
         completeCb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    todoEdit.setPaintFlags(todoEdit.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    todoEdit.setTextColor(Color.GRAY);
-                } else {
-                    todoEdit.setPaintFlags(todoEdit.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-                    todoEdit.setTextColor(Color.WHITE);
-                }
+                UIUtils.setTextViewStrikeThrough(todoEdit, isChecked);
+                todoEdit.setTextColor(isChecked ? Color.GRAY : Color.WHITE);
             }
         });
 
@@ -126,19 +145,36 @@ public class TodoEditActivity extends AppCompatActivity implements
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         Calendar c = Calendar.getInstance();
-        c.setTime(todo.remindDate);
+        c.setTime(remindDate);
         c.set(year, monthOfYear, dayOfMonth);
-        todo.remindDate = c.getTime();
-        dateTv.setText(new SimpleDateFormat("EEE, MMM dd, yyyy", Locale.getDefault()).format(todo.remindDate));
+
+        remindDate = c.getTime();
+        dateTv.setText(DateUtils.dateToStringDate(remindDate));
     }
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         Calendar c = Calendar.getInstance();
-        c.setTime(todo.remindDate);
+        c.setTime(remindDate);
         c.set(Calendar.HOUR_OF_DAY, hourOfDay);
         c.set(Calendar.MINUTE, minute);
-        todo.remindDate = c.getTime();
-        timeTv.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(todo.remindDate));
+
+        remindDate = c.getTime();
+        timeTv.setText(DateUtils.dateToStringTime(remindDate));
+    }
+
+    private void saveAndExit() {
+        if (todo == null) {
+            todo = new Todo(todoEdit.getText().toString(), remindDate);
+        }
+
+        todo.done = completeCb.isChecked();
+        todo.text = todoEdit.getText().toString();
+        todo.remindDate = remindDate;
+
+        Intent result = new Intent();
+        result.putExtra(KEY_TODO, todo);
+        setResult(Activity.RESULT_OK, result);
+        finish();
     }
 }

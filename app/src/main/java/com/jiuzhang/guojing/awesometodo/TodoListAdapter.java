@@ -1,6 +1,7 @@
 package com.jiuzhang.guojing.awesometodo;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,11 +17,11 @@ import java.util.List;
 
 public class TodoListAdapter extends BaseAdapter {
 
-    private Context context;
+    private MainActivity activity;
     private List<Todo> data;
 
-    public TodoListAdapter(Context context, List<Todo> data) {
-        this.context = context;
+    public TodoListAdapter(MainActivity activity, List<Todo> data) {
+        this.activity = activity;
         this.data = data;
     }
 
@@ -40,10 +41,10 @@ public class TodoListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder vh;
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.main_list_item, parent, false);
+            convertView = activity.getLayoutInflater().inflate(R.layout.main_list_item, parent, false);
 
             vh = new ViewHolder();
             vh.todoText = (TextView) convertView.findViewById(R.id.main_list_item_text);
@@ -57,19 +58,29 @@ public class TodoListAdapter extends BaseAdapter {
         vh.todoText.setText(todo.text);
 
         if (todo.done) {
+            // strike through effect on the text
             vh.todoText.setPaintFlags(vh.todoText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         } else {
+            // no strike through effect
             vh.todoText.setPaintFlags(vh.todoText.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
+        vh.doneCheckbox.setChecked(todo.done);
         vh.doneCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                todo.done = isChecked;
-                notifyDataSetChanged();
+                activity.updateTodo(position, isChecked);
             }
         });
-        vh.doneCheckbox.setChecked(todo.done);
+
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(activity, TodoEditActivity.class);
+                intent.putExtra(TodoEditActivity.KEY_TODO, todo);
+                activity.startActivityForResult(intent, MainActivity.REQ_CODE_TODO_EDIT);
+            }
+        });
 
         return convertView;
     }

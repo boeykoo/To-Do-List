@@ -20,7 +20,6 @@
             </intent-filter>
         </activity>
 
-
         <activity
             android:name=".TodoEditActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
