@@ -8,13 +8,19 @@ import android.support.annotation.NonNull;
 
 import com.jiuzhang.guojing.awesometodo.AlarmReceiver;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class AlarmUtils {
 
     public static void setAlarm(@NonNull Context context, @NonNull Date date) {
-        AlarmManager alarmMgr;
-        alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        Calendar c = Calendar.getInstance(); // c will contain the current time
+        if (date.compareTo(c.getTime()) < 0) { // this statement checks if date is smaller than current time
+            // we only fire alarm when date is in the future
+            return;
+        }
+
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         Intent intent = new Intent(context, AlarmReceiver.class);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context,

@@ -4,4 +4,6 @@
     <string name="set_date">Set date</string>
     <string name="set_time">Set time</string>
     <string name="completed">Completed</string>
+    <string name="whats_next">What\'s next</string>
+    <string name="action_delete">Delete</string>
 </resources>
